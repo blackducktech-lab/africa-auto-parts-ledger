@@ -384,9 +384,9 @@
                 const sign = isIncome ? '+' : '-';
 
                 return `
-                    <div class="bg-white rounded-2xl p-3.5 shadow-xs border border-slate-200/90 flex flex-col gap-2 transition hover:border-slate-300">
-                        <div class="flex items-start justify-between gap-2">
-                            <div class="space-y-0.5">
+                    <div class="ledger-record bg-white rounded-2xl p-3.5 shadow-xs border border-slate-200/90 flex flex-col gap-2 transition hover:border-slate-300">
+                        <div class="record-top flex items-start justify-between gap-2">
+                            <div class="record-info space-y-0.5">
                                 <div class="flex items-center gap-1.5 flex-wrap">
                                     <span class="text-[10px] font-bold px-2 py-0.5 rounded-md ${badgeColor}">
                                         ${isIncome ? '收入 IN' : '支出 OUT'}
@@ -397,7 +397,7 @@
                                 <h3 class="text-sm font-bold text-slate-800 pt-0.5">${cat.zh}</h3>
                                 <p class="text-[11px] font-medium text-slate-400">${cat.en}</p>
                             </div>
-                            <div class="text-right shrink-0">
+                            <div class="record-money text-right shrink-0">
                                 <p class="text-base font-bold ${amountColor}">
                                     ${sign}${formatMoney(item.amount, item.currency)}
                                 </p>
@@ -406,12 +406,12 @@
                         </div>
 
                         ${item.note ? `
-                        <div class="bg-slate-50 px-3 py-1.5 rounded-xl text-xs text-slate-600 border border-slate-100">
+                        <div class="record-note bg-slate-50 px-3 py-1.5 rounded-xl text-xs text-slate-600 border border-slate-100">
                             📝 ${escapeHTML(item.note)}
                         </div>
                         ` : ''}
 
-                        <div class="flex justify-end gap-2 pt-1 border-t border-slate-100">
+                        <div class="record-actions flex justify-end gap-2 pt-1 border-t border-slate-100">
                             <button onclick="openModal('${item.id}')" class="text-xs font-semibold text-slate-500 hover:text-navy-800 px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-blue-50 transition">
                                 編輯 / Edit
                             </button>
@@ -513,10 +513,12 @@
             }
 
             modal.classList.remove('hidden');
+            document.body.classList.add('modal-open');
         }
 
         function closeModal() {
             document.getElementById('recordModal').classList.add('hidden');
+            document.body.classList.remove('modal-open');
         }
 
         function appendTag(tagText) {

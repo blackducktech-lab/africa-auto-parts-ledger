@@ -5,7 +5,7 @@ const scopePath = new URL(self.registration.scope).pathname;
 const CACHE_PREFIX = 'export-ledger-' + scopePath + '-';
 const CACHE_NAME = CACHE_PREFIX + CACHE;
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL)));
+  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
 });
 self.addEventListener('activate', event => {
   event.waitUntil(caches.keys().then(keys => Promise.all(keys

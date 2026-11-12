@@ -27,7 +27,7 @@ test('offline worker only handles its own project and only removes its own old c
     URL,
     self: {
       registration: { scope }, location: { origin },
-      clients: { claim: async () => {} },
+      clients: { claim: async () => {} }, skipWaiting: async () => {},
       addEventListener: (name, handler) => { handlers[name] = handler; }
     },
     caches: {

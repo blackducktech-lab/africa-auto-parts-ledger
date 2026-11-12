@@ -1,3 +1,122 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Readable bilingual labels with a restrained blue ledger identity. */
+.storage-notice summary {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 44px 12px 16px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #1e3a8a;
+  list-style: none;
+}
+.storage-notice summary::-webkit-details-marker { display: none; }
+.storage-notice summary::after { content: '+'; position: absolute; right: 18px; top: 18px; font-size: 20px; line-height: 1; }
+.storage-notice[open] summary::after { content: '−'; }
+.section-title > span { display: block; margin-top: 2px; font-size: 12px; line-height: 1.5; font-weight: 500; color: #64748b; }
+.ledger-app :is(button, summary, a, select, input, textarea):focus-visible {
+  outline: 3px solid #38bdf8;
+  outline-offset: 3px;
+}
+.ledger-app :is(#usdNet, #twdNet, #usdIncome, #usdExpense, #twdIncome, #twdExpense, .record-money) { font-variant-numeric: tabular-nums; }
+.record-note { overflow-wrap: anywhere; white-space: pre-wrap; }
+#recordForm { min-height: 0; overscroll-behavior: contain; }
+.ledger-app.modal-open { overflow: hidden; }
+
+@media (max-width: 639px) {
+  .ledger-app { font-size: 15px; line-height: 1.55; padding-bottom: calc(108px + env(safe-area-inset-bottom)); }
+  .ledger-app [class~='text-xs'] { font-size: 13px; line-height: 1.5; }
+  .ledger-app [class~='text-sm'] { font-size: 15px; line-height: 1.55; }
+  .ledger-app :is([class~='text-[9px]'], [class~='text-[10px]'], [class~='text-[11px]']) {
+    font-size: 12px;
+    line-height: 1.5;
+    letter-spacing: normal;
+  }
+  .ledger-app button, .ledger-app summary, .ledger-app label:has(input[type='file']) { min-height: 44px; min-width: 44px; touch-action: manipulation; }
+  .ledger-app :is(input:not([type='hidden']):not([type='file']), select, textarea) {
+    min-width: 0;
+    min-height: 48px;
+    max-width: 100%;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  .ledger-app textarea { min-height: 88px; resize: vertical; }
+  .ledger-header { padding-left: 14px; padding-right: 14px; gap: 8px; }
+  .ledger-brand-icon { padding: 6px; border-radius: 10px; }
+  .ledger-brand-icon svg { height: 20px; width: 20px; }
+  .ledger-app-title { font-size: 17px; letter-spacing: normal; }
+  .ledger-tools > button:first-child { display: none; }
+  .ledger-tools > button { min-height: 48px; padding: 6px 10px; }
+  .ledger-tools > button svg { display: none; }
+  .ledger-tools > button > div { text-align: center; line-height: 1.35; }
+  .ledger-shell { padding: 14px 14px 0; }
+  #installPromoBanner { gap: 8px; padding: 10px; }
+  #installPromoBanner > div:first-child { min-width: 0; }
+  #installPromoBanner .install-promo-art { display: none; }
+  #installPromoBanner button { padding: 6px 8px; }
+  #installPromoBanner button[aria-label='Close'] { padding: 12px; }
+  .ledger-filterbar { flex-direction: column; align-items: stretch; gap: 10px; padding: 12px; }
+  .ledger-filterbar > div:first-child { min-width: 0; width: 100%; }
+  .ledger-filterbar > div:first-child > div { min-width: 0; }
+  #monthFilter { min-height: 44px; }
+  .ledger-currency-tabs { width: 100%; gap: 4px; }
+  .ledger-currency-tabs > button { flex: 1; min-height: 54px; font-size: 14px; }
+  #card-USD, #card-TWD { padding: 16px; }
+  .summary-heading { flex-direction: column; gap: 12px; }
+  .summary-description { display: none; }
+  .summary-net { width: 100%; text-align: left; }
+  .summary-net > p:first-child { font-size: 13px; }
+  .summary-net :is(#usdNet, #twdNet) { margin-top: 3px; font-size: clamp(23px, 6vw, 28px); line-height: 1.25; overflow-wrap: anywhere; }
+  #summarySection :is(#usdIncome, #usdExpense, #twdIncome, #twdExpense) { font-size: 17px; line-height: 1.4; overflow-wrap: anywhere; }
+  #summarySection [class~='grid-cols-2'] > div { min-width: 0; }
+  #summarySection [id$='RatioText'] { flex-shrink: 0; }
+  #analyticsSection > div:first-child { align-items: flex-start; gap: 8px; }
+  .ledger-app .section-title { font-size: 16px; line-height: 1.4; }
+  #analyticsBadge { flex-shrink: 0; margin-top: 2px; }
+  #categoryBars [class~='truncate'] { white-space: normal; }
+  #sampleBanner { align-items: flex-start; }
+  #sampleBanner button { padding: 8px 12px; }
+  .ledger-history-heading { flex-direction: column; align-items: stretch; gap: 12px; }
+  .ledger-type-tabs { width: 100%; gap: 8px; }
+  .ledger-type-tabs > button { flex: 1; min-height: 44px; font-size: 14px; }
+  .ledger-record { padding: 16px; gap: 12px; }
+  .record-top { flex-wrap: wrap; gap: 12px; }
+  .record-info { flex: 1 1 150px; min-width: 0; }
+  .record-info h3 { font-size: 15px; line-height: 1.5; }
+  .record-money { margin-left: auto; max-width: 100%; }
+  .record-money > p { font-size: 19px; line-height: 1.4; overflow-wrap: anywhere; }
+  .ledger-app .record-note { padding: 10px 12px; font-size: 14px; line-height: 1.65; }
+  .record-actions { gap: 8px; padding-top: 10px; }
+  .record-actions > button { flex: 1; min-height: 44px; font-size: 14px; }
+  #addRecordAction {
+    position: fixed;
+    inset: auto 0 0;
+    z-index: 40;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    border-top: 1px solid #e2e8f0;
+    background: rgba(248, 250, 252, .97);
+    box-shadow: 0 -4px 20px rgb(15 23 42 / .05);
+  }
+  #addRecordAction > button { max-width: 560px; min-height: 58px; margin: 0 auto; padding: 10px 16px; }
+  #recordModal > div, #installModal > div, #dataToolsModal > div { max-height: calc(100dvh - 12px); }
+  #recordModal > div > div:first-child { padding: 16px; gap: 12px; align-items: flex-start; }
+  #recordModal h3 { font-size: 17px; line-height: 1.4; }
+  #recordForm { padding: 16px; flex: 1 1 auto; }
+  .form-money { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 12px; }
+  .form-money > div { grid-column: auto; min-width: 0; }
+  #recordForm label { font-size: 14px; line-height: 1.5; }
+  #formAmount { font-size: 20px; }
+  #recordForm button[onclick^='appendTag'] { padding: 8px 10px; font-size: 13px; }
+  .ledger-form-footer { padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); }
+  .ledger-form-footer button { min-height: 52px; font-size: 16px; }
+  #dataToolsModal > div > div:last-child, #installModal > div > div:last-child { padding: 16px; padding-bottom: calc(20px + env(safe-area-inset-bottom)); }
+  #toast { width: max-content; max-width: calc(100vw - 28px); white-space: normal; border-radius: 16px; text-align: center; top: 84px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ledger-app *, .ledger-app *::before, .ledger-app *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+}

@@ -1,0 +1,8 @@
+node_modules/
+dist/
+reference/
+.local/
+*.zip
+*.log
+.env*
+*Backup*.json

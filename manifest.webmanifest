@@ -1,0 +1,13 @@
+{
+  "id": "./",
+  "name": "汽車零件出口帳本 | Auto Parts Export Ledger",
+  "short_name": "出口帳本",
+  "description": "中英雙語、USD 與 TWD 分開統計的本機收支帳本",
+  "lang": "zh-Hant",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F8FAFC",
+  "theme_color": "#1E3A8A",
+  "icons": [{ "src": "./assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }]
+}

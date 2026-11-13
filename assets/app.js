@@ -80,6 +80,12 @@
         let pendingConfirmCallback = null;
         let storageWriteBlocked = false;
         let preservedStorage = null;
+        let editCloudVersion = null;
+        let formLedgerMode = 'local';
+        let formUserId = null;
+        let draftRecordId = null;
+
+        function isCloudLedger() { return window.ledgerSync?.state.mode === 'cloud'; }
 
         function validateTransactions(data) {
             if (!Array.isArray(data) || data.length > 50000) throw new Error('Invalid ledger');
@@ -487,9 +493,18 @@
         }
 
         function openModal(editId = null) {
+            if (isCloudLedger() && !window.ledgerSync.state.ready) {
+                showToast('請等待共用帳本連線完成 / Wait for the shared ledger to connect.');
+                return;
+            }
+            formLedgerMode = isCloudLedger() ? 'cloud' : 'local';
+            formUserId = window.ledgerSync?.state.user?.uid || null;
+            editCloudVersion = editId && isCloudLedger() ? window.ledgerSync.version(editId) : null;
+            draftRecordId = editId || ('tx_' + crypto.randomUUID());
             const modal = document.getElementById('recordModal');
             const form = document.getElementById('recordForm');
             form.reset();
+            document.getElementById('formSyncError').classList.add('hidden');
 
             if (editId) {
                 const record = transactions.find(t => t.id === editId);
@@ -530,7 +545,7 @@
             }
         }
 
-        function saveRecord(e) {
+        async function saveRecord(e) {
             e.preventDefault();
             const editId = document.getElementById('editId').value;
             const type = document.getElementById('formType').value;
@@ -540,7 +555,19 @@
             const date = document.getElementById('formDate').value;
             const note = document.getElementById('formNote').value.trim();
 
-            const record = { id: editId || ('tx_' + crypto.randomUUID()), type, currency, amount, categoryId, date, note, isSample: false };
+            const record = { id: editId || draftRecordId || ('tx_' + crypto.randomUUID()), type, currency, amount, categoryId, date, note, isSample: false };
+            if (formLedgerMode !== (isCloudLedger() ? 'cloud' : 'local') || formUserId !== (window.ledgerSync?.state.user?.uid || null)) {
+                showToast('帳本已切換，請先保留內容再重新開啟表單 / Ledger changed. Reopen the form.');
+                return;
+            }
+            if (isCloudLedger()) {
+                try {
+                    await window.ledgerSync.save(record, editCloudVersion);
+                    showToast('已儲存至共用帳本 / Saved to shared ledger');
+                    closeModal();
+                } catch (error) { window.showSyncError(error, true); }
+                return;
+            }
             const next = editId ? transactions.map(t => t.id === editId ? record : t) : [record, ...transactions];
             if (!persistTransactions(next)) return;
             showToast(editId ? '已更新紀錄 / Record Updated' : '已新增紀錄 / Record Added');
@@ -551,9 +578,17 @@
 
         // --- 5. DELETE & SAMPLE CLEAR CONFIRMATIONS ---
         function promptDelete(id) {
+            const cloud = isCloudLedger();
+            const version = cloud ? window.ledgerSync.version(id) : null;
             document.getElementById('confirmTitle').textContent = '確定刪除此筆紀錄？ / Delete Record?';
             document.getElementById('confirmMessage').textContent = '刪除後將無法復原 / This action cannot be undone.';
-            pendingConfirmCallback = () => {
+            pendingConfirmCallback = async () => {
+                if (cloud !== isCloudLedger()) { showToast('帳本已切換，請重新操作 / Ledger changed. Try again.'); return; }
+                if (cloud) {
+                    try { await window.ledgerSync.remove(id, version); showToast('已刪除共用紀錄 / Deleted'); }
+                    catch (error) { window.showSyncError(error); }
+                    return;
+                }
                 if (!persistTransactions(transactions.filter(t => t.id !== id))) return;
                 populateMonthDropdown();
                 renderApp();
@@ -563,9 +598,11 @@
         }
 
         function promptClearSampleData() {
+            if (isCloudLedger()) return;
             document.getElementById('confirmTitle').textContent = '清除所有範例資料？ / Clear Samples?';
             document.getElementById('confirmMessage').textContent = '只會清除系統預設的範例，保留您自己輸入的資料。';
             pendingConfirmCallback = () => {
+                if (isCloudLedger()) return;
                 if (!persistTransactions(transactions.filter(t => !t.isSample))) return;
                 populateMonthDropdown();
                 renderApp();
@@ -579,9 +616,13 @@
             pendingConfirmCallback = null;
         }
 
-        document.getElementById('confirmActionBtn').addEventListener('click', () => {
-            if (pendingConfirmCallback) pendingConfirmCallback();
-            closeConfirmDialog();
+        document.getElementById('confirmActionBtn').addEventListener('click', async event => {
+            const callback = pendingConfirmCallback;
+            if (!callback || event.currentTarget.disabled) return;
+            const button = event.currentTarget;
+            button.disabled = true;
+            try { await callback(); }
+            finally { button.disabled = false; closeConfirmDialog(); }
         });
 
         // --- 6. EXPORT TO CSV (EXCEL FRIENDLY WITH UTF-8 BOM) ---
@@ -646,7 +687,7 @@
                 return;
             }
             const todayStr = new Date().toISOString().slice(0, 10);
-            const dataStr = preservedStorage !== null ? preservedStorage : JSON.stringify(transactions, null, 2);
+            const dataStr = !isCloudLedger() && preservedStorage !== null ? preservedStorage : JSON.stringify(transactions, null, 2);
             const blob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(blob);
 
@@ -670,6 +711,7 @@
             reader.onload = function(e) {
                 try {
                     const parsed = validateTransactions(JSON.parse(e.target.result));
+                    if (isCloudLedger()) { window.promptCloudImport(parsed); event.target.value = ''; return; }
                     document.getElementById('confirmTitle').textContent = '以備份取代此帳本？ / Replace this ledger?';
                     document.getElementById('confirmMessage').textContent = '將以 ' + parsed.length + ' 筆備份資料取代此瀏覽器的全部帳目，並非合併。請先下載現有帳本備份。 / This replaces all records; it does not merge them. Download the current backup first.';
                     pendingConfirmCallback = () => {

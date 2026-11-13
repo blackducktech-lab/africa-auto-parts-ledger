@@ -1,5 +1,5 @@
 const CACHE = 'export-ledger-__BUILD_ID__';
-const SHELL = ['./', './index.html', './assets/styles.css', './assets/app.js', './assets/icon.svg', './manifest.webmanifest'];
+const SHELL = ['./', './index.html', './assets/styles.css', './assets/app.js', './assets/sync-core.js', './assets/cloud.js', './assets/sync-ui.js', './assets/icon.svg', './manifest.webmanifest'];
 const scopePath = new URL(self.registration.scope).pathname;
 // Different GitHub Pages projects on one origin must never delete each other's caches.
 const CACHE_PREFIX = 'export-ledger-' + scopePath + '-';
@@ -15,6 +15,6 @@ self.addEventListener('activate', event => {
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
   if (event.request.method !== 'GET' || url.origin !== self.location.origin || !url.pathname.startsWith(scopePath)) return;
-  // Only the app shell is cached. Account records stay in localStorage.
+  // Only the public app shell is cached. Cloud records and login requests are cross-origin and never cached here.
   event.respondWith(caches.match(event.request, { cacheName: CACHE_NAME }).then(hit => hit || fetch(event.request)));
 });

@@ -120,3 +120,26 @@
 @media (prefers-reduced-motion: reduce) {
   .ledger-app *, .ledger-app *::before, .ledger-app *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
 }
+
+.sync-panel { padding: 18px; border: 1px solid #cbd5e1; border-radius: 18px; background: white; color: #334155; font-size: 14px; line-height: 1.65; }
+.sync-heading { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 16px; align-items: center; }
+.sync-heading h2 { font-size: 16px; font-weight: 700; color: #0f2644; }
+#syncStatus { font-size: 12px; font-weight: 600; padding: 3px 9px; border-radius: 8px; background: #f1f5f9; }
+.sync-panel[data-mode="connected"] { border-color: #a7d3c3; }
+.sync-panel[data-mode="connected"] #syncStatus { background: #e5f4ed; color: #166044; }
+.sync-panel[data-mode="waiting"] #syncStatus { background: #fff4db; color: #855015; }
+#syncAccount { margin-top: 8px; overflow-wrap: anywhere; }
+.sync-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+.sync-actions button { min-height: 44px; padding: 9px 14px; border-radius: 10px; font-weight: 600; font-size: 14px; }
+.sync-primary { background: #13385e; color: white; }
+.sync-secondary { border: 1px solid #bdcbd9; background: #f8fafc; color: #173c60; }
+.sync-panel button:focus-visible { outline: 3px solid #387abe; outline-offset: 3px; }
+.ledger-app button:disabled { opacity: .55; cursor: wait; }
+#syncLocalHelp { margin-top: 12px; font-size: 13px; color: #64748b; }
+#syncMessage:not(:empty) { margin-top: 12px; border-top: 1px solid #e2e8f0; padding-top: 10px; color: #9f3c28; }
+@media (max-width: 639px) {
+    .sync-panel { padding: 16px; font-size: 14px; }
+    .sync-heading { align-items: flex-start; flex-direction: column; gap: 6px; }
+    .sync-actions { flex-direction: column; }
+    .sync-actions button { width: 100%; min-height: 46px; }
+}

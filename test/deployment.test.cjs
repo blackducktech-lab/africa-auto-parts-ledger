@@ -10,7 +10,7 @@ test('GitHub project subpaths use local, deployable assets', () => {
   assert.ok(refs.includes('./assets/app.js'));
   assert.ok(refs.includes('./manifest.webmanifest'));
   for (const ref of refs) {
-    if (ref === './assets/styles.css') continue; // Generated during build.
+    if (['./assets/styles.css', './assets/cloud.js'].includes(ref)) continue; // Generated during build.
     assert.ok(fs.existsSync(path.join(root, ref)), ref);
   }
   assert.doesNotMatch(html, /<script[^>]+src="https?:/);

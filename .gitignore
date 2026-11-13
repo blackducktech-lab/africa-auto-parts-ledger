@@ -6,3 +6,5 @@ reference/
 *.log
 .env*
 *Backup*.json
+.firebase/
+ui-debug.log

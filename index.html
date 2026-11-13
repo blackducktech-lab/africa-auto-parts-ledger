@@ -118,11 +118,22 @@
         </div>
 
 
+        <section id="syncPanel" class="sync-panel" aria-label="帳本同步 / Ledger sync" data-mode="local">
+            <div class="sync-heading"><h2 id="syncTitle">本機帳本 / This phone</h2><span id="syncStatus" role="status" aria-live="polite">尚未登入・僅存此瀏覽器 / Local only</span></div>
+            <p id="syncAccount">兩支手機各自登入指定 Google 帳號，即可共用帳目。 / Sign in on both phones to share records.</p>
+            <div class="sync-actions">
+                <button id="googleSignIn" type="button" class="sync-primary">使用 Google 登入 / Sign in</button>
+                <button id="googleSignOut" type="button" class="sync-secondary hidden">登出・返回本機 / Sign out</button>
+                <button id="syncRetry" type="button" class="sync-secondary hidden">重新連線 / Reconnect</button>
+                <button id="importLocalRecords" type="button" class="sync-secondary hidden">匯入此手機舊帳 / Import local records</button>
+            </div>
+            <p id="syncLocalHelp" class="hidden">登入後顯示共用帳目；此手機舊帳保留，確認匯入後兩人才會看到。 / Local records remain on this phone until imported.</p>
+            <p id="syncMessage" role="status" aria-live="polite"></p>
+        </section>
         <details class="storage-notice bg-blue-50 border border-blue-100 rounded-2xl text-xs text-slate-600" aria-label="資料保存說明 / Data storage">
-            <summary><span>本機保存，不會自動同步</span><span class="text-xs font-normal">Device storage &amp; backup</span></summary>
+            <summary><span id="storageSummary">本機保存；登入後可使用兩人共用帳本</span><span class="text-xs font-normal">Storage &amp; backup</span></summary>
             <div class="px-4 pb-4 space-y-2">
-            <p class="font-semibold text-navy-800">帳目只存在此瀏覽器，不會自動跨手機同步。請定期下載 JSON 備份。</p>
-            <p>Records stay in this browser. No automatic device sync. Download JSON backups regularly.</p>
+            <p id="storageDetails" class="font-semibold text-navy-800">未登入時，帳目只存在此瀏覽器。登入後可使用兩人共用帳本，舊帳需自行確認匯入。請定期下載 JSON 備份。</p>
             <p id="offlineStatus" class="text-[11px] text-slate-500">首次開啟請連網；離線快取準備完成後可離線使用。 / Open online first to prepare offline use.</p>
             </div>
         </details>
@@ -314,6 +325,7 @@
 
             <!-- Modal Form Body -->
             <form id="recordForm" onsubmit="saveRecord(event)" class="p-5 space-y-4 overflow-y-auto">
+                <p id="formSyncError" class="hidden text-sm text-rose-700" role="alert"></p>
                 <input type="hidden" id="editId" value="">
 
                 <!-- 1. Type Selector (Income vs Expense) -->
@@ -382,6 +394,7 @@
             </form>
                 <!-- Kept visible while the form fields scroll on a phone. -->
                 <div class="ledger-form-footer px-5 py-4 border-t border-slate-100 bg-white shrink-0">
+                    <p id="saveProgress" class="hidden text-sm text-slate-600 pb-2" role="status">正在儲存至共用帳本，請稍候 / Saving to shared ledger…</p>
                     <button type="submit" form="recordForm" class="w-full bg-navy-800 hover:bg-navy-900 text-white font-bold py-3.5 rounded-2xl shadow-md active:scale-[0.99] transition text-base">
                         儲存紀錄 / Save Record
                     </button>
@@ -502,7 +515,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <h4 class="font-bold text-sm text-navy-900">2. 完整帳本備份與還原 (JSON)</h4>
-                            <p class="text-xs text-slate-600 mt-0.5">換手機時可用備份搬移帳目；還原會取代全部帳目，並非合併或同步。</p>
+                            <p id="restoreHelp" class="text-xs text-slate-600 mt-0.5">本機模式還原會取代全部帳目；共用模式會合併匯入並保留有差異的既有紀錄。</p>
                         </div>
                         <span class="text-2xl">💾</span>
                     </div>
@@ -552,6 +565,9 @@
         <span id="toastMsg">已儲存 / Saved</span>
     </div>
 
+    <script src="./assets/sync-core.js" defer></script>
+    <script src="./assets/cloud.js" defer></script>
     <script src="./assets/app.js" defer></script>
+    <script src="./assets/sync-ui.js" defer></script>
 </body>
 </html>

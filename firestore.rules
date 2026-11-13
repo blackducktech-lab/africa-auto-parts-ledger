@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function member() {
+      return request.auth != null
+        && request.auth.token.email_verified == true
+        && request.auth.token.firebase.sign_in_provider == 'google.com'
+        && request.auth.token.email.lower() in get(/databases/$(database)/documents/access/shared-ledger).data.emails;
+    }
+    function valid(data, id) {
+      return id.matches('^[A-Za-z0-9_-]{1,100}$')
+        && data.keys().hasOnly(['type','currency','amountMinor','categoryId','date','note','deleted','version','createdAt','updatedAt','updatedBy'])
+        && data.keys().hasAll(['type','currency','amountMinor','categoryId','date','note','deleted','version','createdAt','updatedAt','updatedBy'])
+        && data.type in ['INCOME','EXPENSE'] && data.currency in ['USD','TWD']
+        && data.amountMinor is int && data.amountMinor > 0 && data.amountMinor <= 1000000000000
+        && ((data.type == 'INCOME' && data.categoryId in ['parts_sales','freight_reimb','sample_fee','other_income'])
+          || (data.type == 'EXPENSE' && data.categoryId in ['parts_purchase','sea_air_freight','customs_docs','trucking_warehouse','bank_fee','travel_client','other_expense']))
+        && validDate(data.date) && data.deleted is bool
+        && data.note is string && data.note.size() <= 10000
+        && data.version is int && data.version > 0
+        && data.createdAt is timestamp && data.updatedAt == request.time
+        && data.updatedBy == request.auth.uid;
+    }
+    function validDate(value) {
+      // Calendar dates, including the Gregorian century/leap-year exception.
+      return value is string && (
+        value.matches('^[0-9]{4}-(0[13578]|1[02])-(0[1-9]|[12][0-9]|3[01])$')
+        || value.matches('^[0-9]{4}-(0[469]|11)-(0[1-9]|[12][0-9]|30)$')
+        || value.matches('^[0-9]{4}-02-(0[1-9]|1[0-9]|2[0-8])$')
+        || value.matches('^([0-9]{2}(0[48]|[2468][048]|[13579][26])|([02468][048]|[13579][26])00)-02-29$'));
+    }
+    match /entries/{id} {
+      allow read: if member();
+      allow create: if member() && valid(request.resource.data, id)
+        && request.resource.data.version == 1 && request.resource.data.createdAt == request.time
+        && request.resource.data.deleted == false;
+      allow update: if member() && valid(request.resource.data, id)
+        && request.resource.data.version == resource.data.version + 1
+        && request.resource.data.createdAt == resource.data.createdAt
+        && resource.data.deleted == false
+        && (request.resource.data.deleted == false || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['deleted','version','updatedAt','updatedBy']));
+      allow delete: if false;
+    }
+    // Membership is provisioned privately by the project owner, never by browser clients.
+    match /{document=**} { allow read, write: if false; }
+  }
+}
